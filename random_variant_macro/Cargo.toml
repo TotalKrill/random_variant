@@ -1,0 +1,19 @@
+[package]
+name = "random_variant_macro"
+version = "0.1.0"
+edition = "2021"
+
+authors = ["Kristoffer Ödmark <kristoffer.odmark90@gmail.com>"]
+description = "To be used with all variant, contains the derive macro"
+license = "MIT"
+repository = "https://github.com/TotalKrill/random_variant"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1.0"
+syn = {version = "1.0", features = ["full", "extra-traits"]}
+proc-macro-error = "1.0"
+proc-macro2 = "1.0"
