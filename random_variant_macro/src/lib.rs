@@ -11,91 +11,49 @@ use proc_macro2::{Span, TokenStream as TokenStream2};
 use proc_macro_error::{abort, proc_macro_error};
 use syn::{
     punctuated::Punctuated, token::Comma, Field, GenericParam, Generics, Ident, Item, TraitBound,
-    TraitBoundModifier, Type, TypeParamBound, TypePath,
+    TraitBoundModifier, TypeParamBound,
 };
 
-#[derive(Debug)]
-struct StructFieldGen {
-    name: Ident,
-    ty: TypePath,
-}
-
-#[derive(Debug)]
-struct AnonStructFieldGen {
-    id: Ident,
-    ty: TypePath,
-}
-
-#[derive(Debug)]
-struct EnumFieldGen {
-    id: Ident,
-    ty: Type,
-    name: Option<Ident>,
-}
-
-fn do_enum_gen(var_id: &Ident, field_data: &Punctuated<Field, Comma>) -> TokenStream2 {
-    let mut field_gen = Vec::new();
-    for (idx, field) in field_data.iter().enumerate() {
-        field_gen.push(EnumFieldGen {
-            id: Ident::new(&format!("v{}", &idx.to_string()), Span::call_site()),
-            ty: field.ty.clone(),
-            name: field.ident.clone(),
-        });
-    }
-
+fn do_enum_gen(i: usize, var_id: &Ident, field_data: &Punctuated<Field, Comma>) -> TokenStream2 {
     let mut named_fields = false;
 
-    let names: Vec<TokenStream2> = field_gen
+    let names: Vec<TokenStream2> = field_data
         .iter()
         .map(|field_gen| {
-            let field_id = &field_gen.id;
-            let field_name = &field_gen.name;
+            let field_name = &field_gen.ident;
+            let field_type = &field_gen.ty;
             if let Some(field_name) = field_name {
                 named_fields = true;
                 quote! {
-                    #field_name: #field_id
+                    #field_name: RandomVariant::random_variant(rng)
                 }
             } else {
                 quote! {
-                    #field_id
+                    <#field_type>::random_variant(rng)
                 }
             }
         })
         .collect();
 
-    let mut enum_gen = if !named_fields {
+    let enum_gen = if !named_fields {
         quote! {
-            let s = Self :: #var_id (
-              #( #names.clone() ),*
-            );
-            vec.push(s);
+            #i => {
+                Self :: #var_id (
+                  #( #names ),*
+                )
+            },
         }
     } else {
         quote! {
-            let s = Self :: #var_id {
-              #( #names.clone() ),*
-            };
-            vec.push(s);
+            #i => {
+                Self :: #var_id {
+                  #( #names ),*
+                }
+            },
         }
     };
-
-    for field in field_gen.iter().rev() {
-        let fname = &field.id;
-        let ftype = &field.ty;
-
-        enum_gen = quote! {
-            for #fname in <#ftype as EveryVariant>::every_variant() {
-                #enum_gen
-            }
-        };
-    }
-
-    let variant_gen = quote! {
-        #enum_gen
-    };
-    println!("{}", variant_gen);
-
-    variant_gen
+    // println!("{}", enum_gen);
+    enum_gen
 }
 
 fn do_bound_gen(generics: &Generics) -> Generics {
@@ -147,7 +105,7 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
 
                 match var.fields {
                     syn::Fields::Unnamed(ref fields) => {
-                        let variant_gen = do_enum_gen(&varid, &fields.unnamed);
+                        let variant_gen = do_enum_gen(i, &varid, &fields.unnamed);
                         variant_generators.push(variant_gen);
                         //println!("quote: {:?}", layeridarm.to_string());
                     }
@@ -159,7 +117,7 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
                         variant_generators.push(variant_gen);
                     }
                     syn::Fields::Named(ref fields) => {
-                        let variant_gen = do_enum_gen(&varid, &fields.named);
+                        let variant_gen = do_enum_gen(i, &varid, &fields.named);
                         variant_generators.push(variant_gen);
                     }
                 }
@@ -168,12 +126,12 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
             let bounded_generics = do_bound_gen(&it.generics);
             let (impl_generics, ty_generics, where_clause) = bounded_generics.split_for_impl();
 
-            let number_variants: usize = 2;
+            let number_variants: usize = variant_generators.len();
 
             let out = quote! {
                 impl #impl_generics RandomVariant for #name #ty_generics #where_clause {
                     fn random_variant<R: rand::Rng>(rng: &mut R) -> Self {
-                        let u: usize = rng.gen_range(0..=#number_variants);
+                        let u: usize = rng.gen_range(0..#number_variants);
                         match u {
                             #( #variant_generators )*
                            _ => {
@@ -184,7 +142,7 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
                 }
             };
 
-            println!("{}", out);
+            // println!("{}", out);
             out.into()
         }
         Item::Struct(ref it) => {
@@ -198,96 +156,74 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
             #[allow(unused_assignments)]
             let mut structgen = quote! {};
 
+            let mut use_brackets = false;
+            // No identity
             if it.fields.iter().any(|f| f.ident.is_none()) {
-                let mut fieldgens = Vec::new();
+                let mut variants: Vec<TokenStream2> = Vec::new();
                 // Here we come if its an struct with anonymous fields
-                for (idx, field) in it.fields.iter().enumerate() {
-                    if let syn::Type::Path(path) = field.ty.clone() {
-                        fieldgens.push(AnonStructFieldGen {
-                            id: Ident::new(&format!("v{}", &idx.to_string()), Span::call_site()),
-                            ty: path.clone(),
-                        });
+                for field in it.fields.iter() {
+                    if let syn::Type::Path(_path) = field.ty.clone() {
+                        variants.push(quote! {
+                            RandomVariant::random_variant(rng),
+                        })
                     } else {
                         abort!(field, "Ident is missing ");
                     }
                 }
 
-                let names: Vec<Ident> = fieldgens.iter().map(|f| f.id.clone()).collect();
-                structgen = quote! {
-                    let s = #name(
-                      #( #names.clone() ),*
-                    );
-                    vec.push(s);
-                };
-
-                for field in fieldgens.iter().rev() {
-                    let fname = &field.id;
-                    let ftype = &field.ty;
-
-                    structgen = quote! {
-                        for #fname in <#ftype as EveryVariant>::every_variant() {
-                            #structgen
-                        }
-                    };
-                }
-                // println!("{}", structgen);
+                structgen = quote!(
+                    #( #variants )*
+                )
             } else {
-                let mut fieldgens = Vec::new();
-                for field in it.fields.iter() {
-                    if let Some(name) = field.ident.clone() {
-                        if let syn::Type::Path(path) = field.ty.clone() {
-                            let fieldgen = StructFieldGen { name, ty: path };
-                            fieldgens.push(fieldgen);
-                        } else {
-                            abort!(field, "Ident is missing ");
-                        }
-                    }
+                let fieldgens: Vec<Ident> = it
+                    .fields
+                    .iter()
+                    .filter_map(|field| field.ident.clone())
+                    .collect();
+
+                let mut variants: Vec<TokenStream2> = Vec::new();
+                for field in fieldgens {
+                    variants.push(quote! {
+                       #field:  RandomVariant::random_variant(rng),
+                    });
                 }
-
-                let names: Vec<Ident> = fieldgens.iter().map(|f| f.name.clone()).collect();
-                structgen = quote! {
-                      #( #names: RandomVariant::random_variant(rng) ),*
-                };
-
-                // for field in fieldgens.iter().rev() {
-                //     let fname = &field.name;
-                //     let ftype = &field.ty;
-                //     // println!("type: {}, dbg: {:?}", ftype.to_token_stream(), ftype);
-
-                //     structgen = quote! {
-                //         #ftype as EveryVariant>::every_variant() {
-                //             #structgen
-                //         }
-                //     };
-                // }
+                use_brackets = true;
+                structgen = quote!(
+                    #( #variants )*
+                )
             }
+            // println!("{}", structgen);
 
             let bounded_generics = do_bound_gen(&it.generics);
             let (impl_generics, ty_generics, where_clause) = bounded_generics.split_for_impl();
+            let out = if use_brackets {
+                quote! {
+                    impl #impl_generics RandomVariant for #name #ty_generics #where_clause {
+                        fn random_variant<R: rand::Rng>(rng: &mut R) -> Self {
+                            Self {
+                                #structgen
+                            }
 
-            let out = quote! {
-                impl #impl_generics RandomVariant for #name #ty_generics #where_clause {
-                    fn random_variant<R: rand::Rng>(rng: &mut R) -> Self {
-                        Self {
-                            #structgen
+                        }
+                    }
+                }
+            } else {
+                quote! {
+                    impl #impl_generics RandomVariant for #name #ty_generics #where_clause {
+                        fn random_variant<R: rand::Rng>(rng: &mut R) -> Self {
+                            Self (
+                                #structgen
+                            )
                         }
                     }
                 }
             };
 
-            println!("{}", out);
+            // println!("{}", out);
             out.into()
         }
         _ => {
             abort!(item, "Only has an effect on enums and structs ");
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
     }
 }
