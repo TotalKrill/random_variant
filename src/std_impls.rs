@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr},
+};
 
 use rand::Rng;
 
@@ -40,6 +43,40 @@ where
         hashmap
     }
 }
+
+impl RandomVariant for SocketAddr {
+    fn random_variant<R: Rng>(rng: &mut R) -> Self {
+        Self::new(
+            RandomVariant::random_variant(rng),
+            RandomVariant::random_variant(rng),
+        )
+    }
+}
+
+impl RandomVariant for IpAddr {
+    fn random_variant<R: Rng>(rng: &mut R) -> Self {
+        let u: usize = rng.gen_range(0..2);
+        match u {
+            0 => IpAddr::V4(RandomVariant::random_variant(rng)),
+            1 => IpAddr::V6(RandomVariant::random_variant(rng)),
+            _ => panic!(),
+        }
+    }
+}
+impl RandomVariant for Ipv6Addr {
+    fn random_variant<R: Rng>(rng: &mut R) -> Self {
+        let u: u128 = rng.gen();
+        u.into()
+    }
+}
+
+impl RandomVariant for Ipv4Addr {
+    fn random_variant<R: Rng>(rng: &mut R) -> Self {
+        let u: u32 = rng.gen();
+        u.into()
+    }
+}
+
 macro_rules! impl_random {
     ($($t:ty),* ) => {
         $(

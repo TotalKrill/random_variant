@@ -8,6 +8,12 @@ description = "To be used with all variant, contains the derive macro"
 license = "MIT"
 repository = "https://github.com/TotalKrill/every_variant"
 
+readme = "./src/lib.rs"
+
 [dependencies]
 rand = "0.8.5"
-random_variant_macro = {version ="*", path ="./random_variant_macro"}
+random_variant_macro = {version ="0.1", path ="./random_variant_macro"}
+
+[dev-dependencies]
+serde = { version = "1.0.142", features = ["derive"] }
+serde_json = "1.0.83"
