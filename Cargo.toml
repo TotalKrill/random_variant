@@ -1,6 +1,6 @@
 [package]
 name = "random_variant"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Kristoffer Ödmark <kristoffer.odmark90@gmail.com>"]
 edition = "2018"
 
@@ -8,7 +8,7 @@ description = "To be used with all variant, contains the derive macro"
 license = "MIT"
 repository = "https://github.com/TotalKrill/every_variant"
 
-readme = "./src/lib.rs"
+readme = "./README.md"
 
 [dependencies]
 rand = "0.8.5"
