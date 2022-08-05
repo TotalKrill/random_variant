@@ -41,21 +41,21 @@ mod tests {
         let text_len = String::random_variant(&mut rng).len();
     }
 
-    //     #[derive(EveryVariant, Debug, Clone)]
-    //     pub struct Message {
-    //         pub message: String,
-    //         pub number: u32,
-    //         pub opt: Option<u64>,
-    //         pub nest: Top,
-    //         pub second: SecondTop,
-    //     }
+    // #[derive(RandomVariant, Debug, Clone)]
+    // pub struct Message {
+    //     pub message: String,
+    //     pub number: u32,
+    //     pub opt: Option<u64>,
+    //     pub nest: Top,
+    //     pub second: SecondTop,
+    // }
 
-    //     #[derive(EveryVariant, Debug, Clone)]
-    //     pub enum SecondTop {
-    //         One,
-    //         Two(Nested),
-    //         Three,
-    //     }
+    #[derive(RandomVariant, Debug, Clone)]
+    pub enum SecondTop {
+        One,
+        Two(Nested),
+        Three,
+    }
 
     //     #[derive(EveryVariant, Debug, Clone)]
     //     pub enum Top {
@@ -63,12 +63,12 @@ mod tests {
     //         Nested(Nested),
     //     }
 
-    //     #[derive(EveryVariant, Debug, Clone)]
-    //     pub enum Nested {
-    //         First,
-    //         Second,
-    //         Third,
-    //     }
+    #[derive(RandomVariant, Debug, Clone)]
+    pub enum Nested {
+        First,
+        Second,
+        Third,
+    }
 
     //     #[derive(EveryVariant, Debug, Clone)]
     //     pub struct TestUnnamed3(pub u16);
