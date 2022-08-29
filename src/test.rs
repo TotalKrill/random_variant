@@ -75,6 +75,9 @@ mod tests {
     #[derive(RandomVariant, Debug, Clone)]
     pub struct TestUnnamed3(pub u16);
 
+    // #[derive(RandomVariant, Debug, Clone)]
+    // pub struct TestUnnamedBorrow<'a>(pub &'a str);
+
     #[derive(RandomVariant, Debug, Clone)]
     pub enum TestUnnamed1 {
         UnnamedSingle(u16),

@@ -130,7 +130,7 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
 
             let out = quote! {
                 impl #impl_generics RandomVariant for #name #ty_generics #where_clause {
-                    fn random_variant<R: rand::Rng>(rng: &mut R) -> Self {
+                    fn random_variant<R: random_variant::rand::Rng>(rng: &mut R) -> Self {
                         let u: usize = rng.gen_range(0..#number_variants);
                         match u {
                             #( #variant_generators )*
@@ -199,7 +199,7 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
             let out = if use_brackets {
                 quote! {
                     impl #impl_generics RandomVariant for #name #ty_generics #where_clause {
-                        fn random_variant<R: rand::Rng>(rng: &mut R) -> Self {
+                        fn random_variant<R: random_variant::rand::Rng>(rng: &mut R) -> Self {
                             Self {
                                 #structgen
                             }
@@ -210,7 +210,7 @@ pub fn derive_every_variant(item: TokenStream) -> TokenStream {
             } else {
                 quote! {
                     impl #impl_generics RandomVariant for #name #ty_generics #where_clause {
-                        fn random_variant<R: rand::Rng>(rng: &mut R) -> Self {
+                        fn random_variant<R: random_variant::rand::Rng>(rng: &mut R) -> Self {
                             Self (
                                 #structgen
                             )

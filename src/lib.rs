@@ -4,6 +4,11 @@ pub use random_variant_macro::*;
 mod std_impls;
 pub use std_impls::*;
 
+#[cfg(feature = "rv_heapless")]
+mod heapless_impl;
+#[cfg(feature = "rv_heapless")]
+pub use heapless_impl::*;
+
 /// Trait that returns a random variant of the given type, if you are creating a
 /// new type to limit some values, instead of deriving the RandomVariant,
 ///

@@ -89,7 +89,55 @@ macro_rules! impl_random {
     };
 }
 
-impl_random!((), i32, u32, i64, u64, f32, f64, i8, u8, u16, i16, char);
+impl_random!(
+    bool,
+    (),
+    i8,
+    i16,
+    i32,
+    i64,
+    i128,
+    u8,
+    u16,
+    u32,
+    u64,
+    u128,
+    f32,
+    f64,
+    char
+);
+
+macro_rules! impl_nonzeroes{
+    ($($t:ty),* ) => {
+        $(
+            impl RandomVariant for $t {
+                fn random_variant<R: Rng>(rng: &mut R) -> Self {
+                    let mut i = rng.gen();
+                    loop {
+                        if let Some(val) = <$t>::new(i) {
+                            return val;
+                        } else {
+                            i = rng.gen();
+                        }
+                    }
+                }
+            }
+            )*
+    };
+}
+
+impl_nonzeroes!(
+    std::num::NonZeroI128,
+    std::num::NonZeroI64,
+    std::num::NonZeroI32,
+    std::num::NonZeroI16,
+    std::num::NonZeroI8,
+    std::num::NonZeroU128,
+    std::num::NonZeroU64,
+    std::num::NonZeroU32,
+    std::num::NonZeroU16,
+    std::num::NonZeroU8
+);
 
 macro_rules! impl_random_tuple {
     ($($gen:ident),* ) => {

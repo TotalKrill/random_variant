@@ -1,6 +1,6 @@
 [package]
 name = "random_variant"
-version = "0.1.1"
+version = "0.2.1"
 authors = ["Kristoffer Ödmark <kristoffer.odmark90@gmail.com>"]
 edition = "2018"
 
@@ -10,9 +10,17 @@ repository = "https://github.com/TotalKrill/every_variant"
 
 readme = "./README.md"
 
+[features]
+default = []
+rv_heapless = ["heapless"]
+
 [dependencies]
 rand = "0.8.5"
-random_variant_macro = {version ="0.1", path ="./random_variant_macro"}
+random_variant_macro = {version ="0.2", path ="./random_variant_macro"}
+
+[dependencies.heapless]
+version = "0.7"
+optional = true
 
 [dev-dependencies]
 serde = { version = "1.0.142", features = ["derive"] }
