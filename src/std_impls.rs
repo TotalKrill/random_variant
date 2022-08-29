@@ -104,6 +104,7 @@ impl_random!(
     u128,
     f32,
     f64,
+    usize,
     char
 );
 
