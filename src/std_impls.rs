@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr},
-};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 
 use rand::Rng;
 
@@ -26,21 +23,6 @@ impl<T: RandomVariant, E: RandomVariant> RandomVariant for Result<T, E> {
             1 => Err(E::random_variant(rng)),
             _ => panic!(""),
         }
-    }
-}
-
-impl<K, V> RandomVariant for HashMap<K, V>
-where
-    K: RandomVariant + core::hash::Hash + Eq,
-    V: RandomVariant,
-{
-    fn random_variant<R: Rng>(rng: &mut R) -> Self {
-        let u: usize = rng.gen_range(0..100);
-        let mut hashmap = HashMap::new();
-        for _i in 0..u {
-            let _e = hashmap.insert(K::random_variant(rng), V::random_variant(rng));
-        }
-        hashmap
     }
 }
 
@@ -170,6 +152,8 @@ impl_random_tuple!(A, B, C, D, E, G, F, H, I, J, K);
 impl_random_tuple!(A, B, C, D, E, G, F, H, I, J, K, L);
 impl_random_tuple!(A, B, C, D, E, G, F, H, I, J, K, L, M);
 
+use std::collections::{HashMap, HashSet};
+
 impl RandomVariant for String {
     fn random_variant<R: Rng>(rng: &mut R) -> Self {
         let mut s = String::new();
@@ -178,5 +162,43 @@ impl RandomVariant for String {
             s.push(rng.gen())
         }
         s
+    }
+}
+
+impl<K, V> RandomVariant for HashMap<K, V>
+where
+    K: RandomVariant + core::hash::Hash + Eq,
+    V: RandomVariant,
+{
+    fn random_variant<R: Rng>(rng: &mut R) -> Self {
+        let u: usize = rng.gen_range(0..100);
+        let mut hashmap = HashMap::new();
+        for _i in 0..u {
+            let _e = hashmap.insert(K::random_variant(rng), V::random_variant(rng));
+        }
+        hashmap
+    }
+}
+impl<T: RandomVariant> RandomVariant for Vec<T> {
+    fn random_variant<R: Rng>(rng: &mut R) -> Self {
+        let mut s = Vec::new();
+        let val = rng.gen_range(0..100);
+        for _ in 0..val {
+            s.push(T::random_variant(rng))
+        }
+        s
+    }
+}
+impl<V> RandomVariant for HashSet<V>
+where
+    V: RandomVariant + core::hash::Hash + Eq,
+{
+    fn random_variant<R: Rng>(rng: &mut R) -> Self {
+        let u: usize = rng.gen_range(0..100);
+        let mut hashset = HashSet::default();
+        for _i in 0..u {
+            let _e = hashset.insert(V::random_variant(rng));
+        }
+        hashset
     }
 }
