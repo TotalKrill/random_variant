@@ -59,6 +59,16 @@ impl RandomVariant for Ipv4Addr {
     }
 }
 
+impl<T: RandomVariant + Default + Copy, const N: usize> RandomVariant for [T; N] {
+    fn random_variant<R: Rng>(rng: &mut R) -> Self {
+        let mut arry: [T; N] = [Default::default(); N];
+        for i in 0..N {
+            arry[i] = T::random_variant(rng);
+        }
+        arry
+    }
+}
+
 macro_rules! impl_random {
     ($($t:ty),* ) => {
         $(

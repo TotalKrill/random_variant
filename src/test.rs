@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests {
+    use crate as random_variant;
     use crate::RandomVariant;
     use rand::thread_rng;
 

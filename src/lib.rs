@@ -27,6 +27,7 @@ pub trait RandomVariant {
 #[allow(dead_code)]
 #[cfg(test)]
 fn example() {
+    use crate as random_variant;
     use serde::Serialize;
     use std::net::IpAddr;
 
