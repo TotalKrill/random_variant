@@ -261,13 +261,14 @@ dependencies = [
 
 [[package]]
 name = "random_variant"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "heapless",
  "rand",
  "random_variant_macro",
  "serde",
  "serde_json",
+ "uuid",
 ]
 
 [[package]]
@@ -431,6 +432,12 @@ name = "unicode-ident"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4f5b37a154999a8f3f98cc23a628d850e154479cd94decf3414696e12e31aaf"
+
+[[package]]
+name = "uuid"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88ad59a7560b41a70d191093a945f0b87bc1deeda46fb237479708a1d6b6cdfc"
 
 [[package]]
 name = "vcell"

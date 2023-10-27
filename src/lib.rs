@@ -9,6 +9,11 @@ mod heapless_impl;
 #[cfg(feature = "rv_heapless")]
 pub use heapless_impl::*;
 
+#[cfg(feature = "uuid")]
+mod uuid;
+#[cfg(feature = "uuid")]
+pub use uuid::*;
+
 /// Trait that returns a random variant of the given type, if you are creating a
 /// new type to limit some values, instead of deriving the RandomVariant,
 ///
