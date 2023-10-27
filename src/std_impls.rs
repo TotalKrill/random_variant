@@ -1,4 +1,7 @@
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr},
+};
 
 use rand::Rng;
 
@@ -174,6 +177,20 @@ impl RandomVariant for String {
         s
     }
 }
+impl<K, V> RandomVariant for BTreeMap<K, V>
+where
+    K: RandomVariant + core::hash::Hash + Eq + Ord,
+    V: RandomVariant + core::hash::Hash + Eq + Ord,
+{
+    fn random_variant<R: Rng>(rng: &mut R) -> Self {
+        let u: usize = rng.gen_range(0..100);
+        let mut hashset = BTreeMap::default();
+        for _i in 0..u {
+            let _e = hashset.insert(K::random_variant(rng), V::random_variant(rng));
+        }
+        hashset
+    }
+}
 
 impl<K, V> RandomVariant for HashMap<K, V>
 where
@@ -206,6 +223,20 @@ where
     fn random_variant<R: Rng>(rng: &mut R) -> Self {
         let u: usize = rng.gen_range(0..100);
         let mut hashset = HashSet::default();
+        for _i in 0..u {
+            let _e = hashset.insert(V::random_variant(rng));
+        }
+        hashset
+    }
+}
+
+impl<V> RandomVariant for BTreeSet<V>
+where
+    V: RandomVariant + core::hash::Hash + Eq + Ord,
+{
+    fn random_variant<R: Rng>(rng: &mut R) -> Self {
+        let u: usize = rng.gen_range(0..100);
+        let mut hashset = BTreeSet::default();
         for _i in 0..u {
             let _e = hashset.insert(V::random_variant(rng));
         }
