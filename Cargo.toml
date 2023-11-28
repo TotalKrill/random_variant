@@ -20,7 +20,7 @@ rand = "0.8.5"
 random_variant_macro = {version ="0.2", path ="./random_variant_macro"}
 
 [dependencies.heapless]
-version = "0.7"
+version = "0.8"
 optional = true
 
 [dependencies.uuid]
